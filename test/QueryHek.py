@@ -10,7 +10,6 @@ import urllib.parse
 
 def main():
 
-
     startYear = ''
     startMonth = ''
     startDay = ''
@@ -37,6 +36,7 @@ def main():
     opDirectory=''
     json = False
     xml = False
+    filter = False
     url = ''
     EVENT_REGION = 'all'
     RESULT_LIMIT = '200'
@@ -118,11 +118,16 @@ def main():
 
 
             else:
+                if tokens[0]:
+                    filterCondition.append(tokens[0].strip())
+                    opVal = tokens[1].split(',')
+                    filterOperators.append( opVal[0].strip())
+                    filterConditionValue.append(opVal[1].strip())
+                    filter = True
+                else:
+                    filter = False
 
-                filterCondition.append(tokens[0].strip())
-                opVal = tokens[1].split(',')
-                filterOperators.append( opVal[0].strip())
-                filterConditionValue.append(opVal[1].strip())
+
 
 
 
@@ -139,18 +144,17 @@ def main():
                   'event_starttime': startYear +"-"+ startMonth +"-"+ startDay +"T"+ startHour +":"+startMinute+":"+ startSecond,
                   'event_endtime': endYear +"-"+ endMonth+"-"+ endDay +"T"+ endHour +":"+endMinute+":"+ endSecond}
 
-
-        for i in range(0, len(filterCondition)):
-            valuesLoop.append({'sparam' + str(i): filterCondition[i], 'op' + str(i): filterOperators[i],
-                               'value' + str(i): filterConditionValue[i]})
-
-
-        values1=values.copy()
-
-        for i in range(0, len(valuesLoop)):
-            values1.update(valuesLoop[i])
-
+        values1 = values.copy()
         print(values1)
+
+        if filter:
+            for i in range(0, len(filterCondition)):
+                valuesLoop.append({'sparam' + str(i): filterCondition[i], 'op' + str(i): filterOperators[i],
+                                   'value' + str(i): filterConditionValue[i]})
+
+            for i in range(0, len(valuesLoop)):
+                values1.update(valuesLoop[i])
+            print(values1)
 
 
         data = urllib.parse.urlencode(values1)
