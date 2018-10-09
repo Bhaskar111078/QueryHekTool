@@ -1,11 +1,13 @@
 # A QueryHek takes a path to input configuration file (including file name) and path to output folder
 # and generates a XML or JSON file by querying HEK API. A query is constructed from the given search conditions in input configuration file
 # @author Bhaskar Ray
-# @version 09/25/2018
+# @version 10/09/2018
 
 import urllib.request
 import urllib.parse
-
+import csv
+import json as j
+import pandas as pd
 
 
 def main():
@@ -32,7 +34,7 @@ def main():
     filterConditionValue = []
     filterOperators = []
     valuesLoop = []
-    fileName=''
+    fileName = ''
     opDirectory=''
     json = False
     xml = False
@@ -41,7 +43,12 @@ def main():
     EVENT_REGION = 'all'
     RESULT_LIMIT = '200'
     ENCODING_SCHEME = 'utf-8'
-    # REQUIRED_PARAMETERS = 6
+
+
+
+
+
+
 
 
     try:
@@ -176,6 +183,47 @@ def main():
     except Exception as e:
         print('Error:', str(e))
 
+    inputCsvFilePath = input("Enter output directory path for csv file: ")
+    with open(opDirectory+fileName, 'r') as f:
+        result_parsedData = j.load(f)
+        resultParsed = result_parsedData['result']
+    result_data = open(inputCsvFilePath + fileName+ "_result.csv", 'w')
+    csvwriter = csv.writer(result_data)
+    count = 0
+    for rslt in resultParsed:
+
+        if count == 0:
+            header = rslt.keys()
+            csvwriter.writerow(header)
+            count += 1
+        csvwriter.writerow(rslt.values())
+    result_data.close()
+
+    inputCsvConfigFilePath = input("Enter input config file directory path with config file name: ")
+
+    with open(inputCsvConfigFilePath, 'r') as f:
+        contentsCSV = f.readlines()
+        f.close()
+        contentsCSV = [contentData.strip('\n') for contentData in contentsCSV]
+
+    df = pd.read_csv( inputCsvFilePath + fileName+ "_result.csv", usecols= contentsCSV)
+    df.to_csv(inputCsvFilePath + fileName+ "_Extractedresult.csv", encoding='utf-8', index=False)
+
 
 if __name__ == "__main__":
     main()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
